@@ -1,0 +1,6 @@
+'main.tex' is the main file that includes all the styling and the content files. Update your information into this file. Delete (or comment out) the \approvalpage line
+for the final version.
+Refrain making changes to the file sfsuthesis.cls.
+Modify all other files under folder 'images' and 'sections'.
+Update the reference.bib file for adding the references to different literatures.
+Include the preface.tex file if needed.
