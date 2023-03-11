@@ -1,0 +1,216 @@
+% (This file is included by thesis.tex; you do not latex it by itself.)
+\chapter{Simulation Study}
+\section{Data Simulation Scheme}\label{sec:sim_scheme}
+Simulating network data to assess the different feature selection methods and to reproduce the experiments is vital. Data can be synthetically generated using various network simulation software tools which may require GPUs to perform large-scale simulations faster and to gain deeper insights. We present an alternative technique for simulating the TCR network data and then compute various performance measures to assess the robustness, accuracy, and other parameters of the various feature selection models implemented earlier. We analyze each of the network properties from the observed data, try to find any implicit relations, approximate the property distributions, and recreate the data correlation among the explanatory variables in the simulated data set. The original TCR repertoire data was heterogeneous in nature which led us to extract the summary statistics for each feature and then create an aggregated data set. Since any correlation that exists among the network features is observed in the heterogeneous (non-aggregated) form of the data, it therefore vital for us to simulate the data in the non-aggregated form and then derive the summary statistics.\par
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.75]{Network_hierarchy.jpg}
+\caption{Dependencies and Hierarchy of the Network Properties}%
+{The above figure give a general idea of how the TCR network properties are dependent on each other and a rough hierarchical structure. This information was derived by analysing the real data.}
+\label{fig:ntwrk_hier}
+\end{figure}
+A high-level hierarchy of the network properties as observed in the real data is shown in the \autoref{fig:ntwrk_hier}. The TCR repertoire network data of each subject has multiple clusters (membership) of varied levels of complexity. Some clusters could be dense (have more nodes) and some could be sparse (have fewer nodes). Refer \autoref{fig:cluster_ex}. Each cluster then has a varied number of nodes and associated nodal properties. As a result, simulating this network data first requires generating the clusters for a subject. Then for each cluster we simulate the \# of nodes and the associated network features.\par
+\begin{figure}[H]
+\centering
+\includegraphics[scale=1]{Cluster_sample.jpg}
+\caption{Sample TCR network data of a subject showing multiple clusters and nodes.}
+\label{fig:cluster_ex}
+\end{figure}
+\subsubsection{Simulating Cluster-count (Membership) data}\label{subsubsec:sim_clust_cnt}
+The number of clusters for each of the 65 subjects were observed from the original TCR repertoire data. \autoref{fig:cluster_ex} represents the distribution of the cluster-count and the log(cluster-count) of the original TCR repertoire data. The log(cluster-count) has an approximate normal form. We then compute the mean and the standard deviation of this distribution. Using the $rlnorm()$ function, which helps to draw random samples from a log normal distribution, with $\text{meanlog} = \text{mean}(\log(\text{cluster-count}))$ and $\text{sdlog} = \text{sd}(\log(\text{cluster-count}))$, we generate samples which are then sued as the cluster-count for the 1000 dummy subjects.\par
+The\autoref{fig:clust_obsv_sim} represents the histogram of the cluster-count from the original observed data versus the cluster-count from the simulated data. The plots shows the semblance between the original data and the simulated data. The simulated cluster-count data serves as the basis for simulating the remaining properties.\par
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.5]{Cluster_real_dt.jpg}
+\caption{Histogram plot for cluster-count and log(cluster-count) of the 65 subjects' TCR repertoire data.}
+\label{fig:cluster_ex}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.7]{Clust_obs_sim.jpg}
+\caption{Histogram plots for the \lq Cluster-count' from the original data versus the \lq Cluster-count' from the simulated data.}
+\label{fig:clust_obsv_sim}
+\end{figure}
+\subsubsection{Simulating Node-count data}\label{subsubsec:sim_node_cnt}
+The simulated cluster-count data dictates the number of TCR network property rows that each of the 1000 dummy subject would have. We then set to simulate the node-count associated with each of the cluster. It is observed that the node-count data from the original TCR repertoire has a right-skewed distribution with maximum frequency occurring for the values 2 and 3, and the remaining subsection has an approximate log-normal form. Therefore, to simulate the node-count, the entire distribution in considered in segments. We calculated the probabilities of the node-count = 2 and 3 and simulate data for these two categories. For the remaining segment of the distribution, we draw samples from the $rlnorm()$ function using a similar technique as we did for simulating the cluster-count data. The \autoref{fig:node_count_obsv_sim} depicts the histogram of the node-count from the original observed data versus the simulated data where we can observe the similarity in the two density functions. We then derive the summary statistics for the simulated node-count data and will use the aggregated data for assessing the various models in subsequent sections.\par
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.75]{Node_count_obs_sim.jpg}
+\caption{Histogram plots for \lq Node-count' from the original data versus the \lq Node-count' from the simulated data.}
+\label{fig:node_count_obsv_sim}
+\end{figure}
+
+\subsubsection{Simulating Remaining Network Properties} \label{subsubsection:sim_rem}
+After the node-count data is simulated, the remaining set of network properties can be simulated. It is observed that some of the properties have a distinct value for certain values of Node-count. The \autoref{tab:node_depnd} outlines some of these relations. Probabilities of the node-count values = 2 and 3 evaluated in the \nameref{subsubsec:sim_node_cnt} sub-section are used to simulate the data for the remaining network properties. Following this, the simulated row-wise data is aggregated for each of the network properties, resulting into a single row of data per dummy subject. \autoref{fig:assort_obsv_sim} represents the histogram comparison of the observed vs simulated data of the network property \lq Assortativity'.\par
+\begin{table}[H]\centering
+\caption{Dependency of some TCR properties on the Node\_count}
+\begin{tabular}{|c|c|c|}\hline
+\cellcolor[HTML]{D9E1F2}\textbf{TCR properties} & \cellcolor[HTML]{D9E1F2}\textbf{Values}  & \cellcolor[HTML]{D9E1F2}\textbf{Values} \\ \hline
+\cellcolor[HTML]{EAEAEA}Node\_count  & \cellcolor[HTML]{EAEAEA}2 & \cellcolor[HTML]{EAEAEA}3 \\ \hline
+Assortativity  & NA & -1 ($99.7\%$ times) \\ 
+Transitivity  & NA & - \\ 
+Degree  & 1 & - \\ 
+Diam\_length  & 2 & - \\
+Deg\_avg  & 1 & - \\ 
+Edge\_density  & 1 & - \\ 
+Centr\_degree  & 0 &  -\\ 
+Centr\_clo  & NA & - \\ 
+Eigen\_centrality  & 1 & - \\ 
+Centr\_eigen  & NA & -\\ \hline
+\end{tabular}
+\label{tab:node_depnd}
+\end{table}
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.75]{Assort_obs_sim.jpg}
+\caption{Histogram plots for comparing the density of \lq Assortativity' from the observed data and from the simulated data.}
+\label{fig:assort_obsv_sim}
+\end{figure}
+
+\subsubsection{Simulating Response Variable} \label{subsubsec:simresponse}
+In order to simulate the response variable, while keeping the correlation between the explanatory variables and the response intact, we use the model from the sub-section \nameref{subsec:plasso_cv}. In a binary classification setting with response variable $y_i \in{0,1}$ assume that we have independent and identically distributed observations $(\mathbf{x}_i, y_i)$ where $i=1, . . . , n$ of a $p$-dimensional vector $\mathbf{x}_i \in \mathbb{R}^p$. The log of odds is given as:
+\begin{equation*}
+\begin{split}
+\log\{\frac{p_{\pmb{\beta}}(\mathbf{x}_i)}{1-p_{\pmb{\beta}}(\mathbf{x}_i)}\}=\beta_0+\beta_1X_1+..+\beta_pX_p=\eta_{\pmb{\beta}}(\mathbf{x}_i)
+\end{split}
+\end{equation*}
+where $p_{\pmb{\beta}} = \mathbb{P}_{\pmb{\beta}}(y_i=1|\mathbf{x}_i)$ and $\pmb{\beta}=(\beta_0,\beta_1, .., \beta_p)^T$ are the coefficients for the $p$ predictors.\par
+Using the Lasso model from \autoref{subsec:plasso_cv} where we obtained feature indexes [25, 43, 82, 89] as significant features, we use these as the predictor variables $X_1,...,X_4$ for simulating the response variable $y$. The log of odds $\eta_{\pmb{\beta}}(\mathbf{x}_i)$ and $p_{\pmb{\beta}}=\mathbb{P}_{\pmb{\beta}}(y_i=1|\mathbf{x}_i)$ can be written as:
+\begin{equation}\label{eq:9}
+\eta_{\pmb{\beta}}(\mathbf{x}_i)=\beta_0+\beta_1X_1+..+\beta_4X_4
+\end{equation}
+\begin{equation}\label{eq:10}
+p_{\pmb{\beta}} = \mathbb{P}_{\pmb{\beta}}(y_i=1|\mathbf{x}_i) =  \frac{\exp(\eta_{\pmb{\beta}}(\mathbf{x}_i))}{1+\exp(\eta_{\pmb{\beta}}(\mathbf{x}_i))}
+\end{equation}
+where the $\pmb{\beta}$ coefficients are artificially created. We then sample randomly from a Bernoulli distribution using the function $rbern()$ such that 1000 random samples are generated with probability $=p_{\pmb{\beta}}$. These random samples are then used as simulated response values for our study.\par
+
+\section{Simulation Results}\label{sec:simresults}
+The simulated network property data is aggregated to produce summary statistics for each subject, similar to what was done for the original data. The data set is then down-sampled to accommodate for the data imbalance. We assess the Lasso, Plasso, Group Lasso, Group Plasso, and Exclusive Lasso models using the simulated data. The top properties or features selected using the simulated data utilize the results from \autoref{subsec:grp_cv_plasso} and \autoref{subsec:plasso_cv} as the benchmark for comparison. Several performance measures are computed by iteratively running the feature selection models on the simulated data.\par
+
+\subsection{Evaluation Criteria} \label{subsec:evalcrt}
+We used the performance measures like - sensitivity, False Discovery Rate (FDR), F1 score, Power, and Stability to evaluate the
+performance of the different feature selection models. A false-positive finding means the selection of any predictor variable except the causal variables by the feature selection method. Sensitivity is defined as the proportion of correctly identifying causal variables among all causal variables in a single iteration. FDR is defined as the frequency of false-positive findings among all variables selected per method and
+iteration. F-1 score is the harmoninc mean of the sensitivity and (1-FDR). It is a measure of performance accuracy of the model. The power of each causal variable is calculated as the frequency of correct selections among all iterations. To estimate stability of a variable selection model, all pair-wise combinations of the selected variables list from each iteration are considered. For each pair, the stability of the two lists of selected variables is determined using the Jaccard’s index given as: $J(A_i,A_j)=\frac{|A_i\cap A_j|}{|A_i\cup A_j|}$, where $A_i$ is the list of variables selected in the $i^{\text{th}}$ iteration and $A_j$ is the list of variables selected in the $j^{\text{th}}$ iteration such that $i\ne j$ and $i,j\in 1,2,..,I (\text{ total number of iterations})$. The Jaccard's index, $J(A_i,A_j)=0$ if the two lists do not overlap, and $J(A_i,A_j)=1$ if the two lists contain the same variables. The average of all pairs is used as stability value for the particular method.
+
+\subsection{Simulation Results from Group Lasso\_CV and Group Plasso} \label{subsec:simstudy_grplasso}
+We assess the Group Lasso\_CV and the Group Plasso models on the simulated data using two sets of causal variables for reference. First, we use the significant network properties (feature blocks), derived using the Group Lasso\_CV model (refer \autoref{subsec:grp_cv_plasso}) on the original data, as the \lq gold-standard' for making comparison. Second, we use the significant network properties (feature blocks), derived using the Lasso\_CV model (refer \autoref{subsec:plasso_cv}) on the original data, as the \lq gold-standard'.\par
+When using the causal network properties (feature blocks) deduced from \autoref{subsec:grp_cv_plasso}, the simulation study for Group Lasso\_CV and Group Plasso models has the performance measures as depicted in the \autoref{tab:grp_lasso_sim_study}. Here observe that the Group Plasso model has higher sensitivity, lower FDR, higher F1 score, higher stability than that of Group Lasso\_CV. These performance measure collectively show that the Group Plasso model has better performance than the Group Lasso\_CV model.\\
+\begin{table}[H]
+\caption{Performance measures of Group Lasso\_CV and Group Plasso models when using variables from Group Lasso\_CV as reference.}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|c|}\hline
+\cellcolor[HTML]{D9E1F2}\textbf{Models} & 
+\cellcolor[HTML]{D9E1F2}\textbf{True Group Indexes}  & 
+\cellcolor[HTML]{D9E1F2}\textbf{Sensitivity} & 
+\cellcolor[HTML]{D9E1F2}\textbf{FDR} &
+\cellcolor[HTML]{D9E1F2}\textbf{F1} &
+\cellcolor[HTML]{D9E1F2}\textbf{Power} &
+\cellcolor[HTML]{D9E1F2}\textbf{Stability} \\ \hline
+Group Lasso\_CV & Group - 1, 5, 6 & 0.8333  & 0.3976 & 0.62 & 1.0, 0.7, 0.8 & 0.5963 \\ \hline
+Group Plasso &  Group - 1, 5, 6 & 0.8667 & 0.3083 & 0.7619 & 1.0, 0.6, 1.0 & 0.8074 \\ \hline
+\end{tabular}}
+\label{tab:grp_lasso_sim_study}
+\end{table}
+For the second setup we use the causal network properties (feature blocks) that correspond to the top network features derived from \autoref{subsec:plasso_cv}. The performance measures for the simulation study on Group Lasso\_CV and Group Plasso models are shown in the \autoref{tab:grp_lasso_vs_lasso_sim_study}. Here we observe that both Group Lasso\_CV and Group Plasso models have low sensitivity, low F1 scores and higher FDR. When comparing these results to those from \autoref{tab:grp_lasso_sim_study}, we find that the overall prediction accuracy is low and misclassification is high. This implies that the two models (Group Lasso\_CV and Group Plasso) did not do well when the causal variables were referenced from the Lasso\_CV model derived in \autoref{subsec:plasso_cv}.\\
+
+\begin{table}[H]
+\caption{Performance measures of Group Lasso\_CV and Group Plasso when using variables from Lasso\_CV as reference.}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|c|}\hline
+\cellcolor[HTML]{D9E1F2}\textbf{Models} & 
+\cellcolor[HTML]{D9E1F2}\textbf{True Group Indexes}  & 
+\cellcolor[HTML]{D9E1F2}\textbf{Sensitivity} & 
+\cellcolor[HTML]{D9E1F2}\textbf{FDR} &
+\cellcolor[HTML]{D9E1F2}\textbf{F1} &
+\cellcolor[HTML]{D9E1F2}\textbf{Power} &
+\cellcolor[HTML]{D9E1F2}\textbf{Stability} \\ \hline
+Group Lasso\_CV & Group - 5, 8, 14, 15   & 0.55 & 0.6309 & 0.4377 & 0.7, 0.8, 0.0, 0.7 &  0.5963\\ \hline
+Group Plasso & Group - 5, 8, 14, 15 & 0.425 & 0.5667 & 0.4243 & 0.6, 1.0, 0.0, 0.1 & 0.8074 \\ \hline
+\end{tabular}}
+\label{tab:grp_lasso_vs_lasso_sim_study}
+\end{table}
+When using the simulated data, the Group Lasso\_CV and the Group Plasso model extracted some additional feature blocks than the assumed causal variables. Since the original data consisted of only 65 subjects while the simulated data has a bigger sample size ($\sim 536$ subjects) it would be interesting to look into the newly selected variables. Each of the two models were run for ten iterations and the frequencies of the selected feature blocks is shown in the \autoref{tab:grp_model_selected_variables}. Collectively, Group Lasso\_CV and Group Plasso models prioritize the Groups - 1, 5, 6, 8, 10, 15.\\
+
+\begin{table}[H]
+%\centering
+\caption{Frequencies of the selected feature blocks when using simulated data.}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\toprule
+& \multicolumn{7}{c|}{\cellcolor[HTML]{D9E1F2}\textbf{Feature Block/ Group Indexes}} \\ 
+\midrule
+\cellcolor[HTML]{D9E1F2}\textbf{Model} & 
+\cellcolor[HTML]{EAEAEA}\textbf{Group-1} & 
+\cellcolor[HTML]{EAEAEA}\textbf{Group-5} & 
+\cellcolor[HTML]{EAEAEA}\textbf{Group-6} & 
+\cellcolor[HTML]{EAEAEA}\textbf{Group-8} & 
+\cellcolor[HTML]{EAEAEA}\textbf{Group-10} & 
+\cellcolor[HTML]{EAEAEA}\textbf{Group-13} & 
+\cellcolor[HTML]{EAEAEA}\textbf{Group-15} \\ \hline
+\cellcolor[HTML]{EAEAEA}{Group Lasso\_CV} & 
+10 & 7 & 8 & 8 & 7 & 2 & 7 \\ \hline
+\cellcolor[HTML]{EAEAEA}{Group Plasso} &
+10 & 6 & 10 & 10 & 1 & - & 1 \\ \hline 
+\bottomrule
+\end{tabular}
+}
+\label{tab:grp_model_selected_variables}
+\end{table}
+
+
+\subsection{Simulation Results from Lasso\_CV and Plasso} \label{subsec:simstudy_plasso}
+Consider the top network features derived from the Lasso\_CV model (refer \autoref{subsec:plasso_cv}) as the \lq gold-standard' for the causal variables. We then assess the Lasso\_CV and the Plasso models on the simulated data against the causal variables. We observe that Plasso performs better for most of the performance measures (sensitivity, F1 score, power and stability) than Lasso\_CV. The FDR measure for the Plasso model was expected to be lower than that of the Lasso\_CV model, however the results show differently. On further triage we found that Plasso almost always selects a not null set of variables in every iteration whereas Lasso\_CV model returns a null set in some iterations. As a result, the FDR measure is higher for the Plasso model than that of Lasso\_CV but the overall F1 score reflects the actual performance accuracy of the two models. Therefore, we can infer that Plasso performs better than Lasso\_CV for feature selection.\\ 
+\begin{table}[H]
+\caption{Performance measures of Lasso\_CV and Plasso models.}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|c|}\hline
+\cellcolor[HTML]{D9E1F2}\textbf{Models} & 
+\cellcolor[HTML]{D9E1F2}\textbf{True Feature Indexes}  & 
+\cellcolor[HTML]{D9E1F2}\textbf{Sensitivity} & 
+\cellcolor[HTML]{D9E1F2}\textbf{FDR} &
+\cellcolor[HTML]{D9E1F2}\textbf{F1} &
+\cellcolor[HTML]{D9E1F2}\textbf{Power} &
+\cellcolor[HTML]{D9E1F2}\textbf{Stability} \\ \hline
+Lasso\_CV & 25, 43, 82, 89 & 0.575 & 0.3968 & 0.5324 & 0.6, 0.9, 0.0, 0.8 & 0.4214 \\ \hline
+Plasso &  25, 43, 82, 89 & 0.75 & 0.4675 & 0.6167 & 1.0, 1.0, 0.0, 1.0	& 0.825\\ \hline
+\end{tabular}}
+\label{tab:lasso_sim_study}
+\end{table}
+Also note that the feature index 82 is never selected in any of the models. As a result the power for this feature is 0. This implies that feature index 82 may not be a true causal variable. Therefore, we look for other soft signals generated from the two Lasso models. Feature indexes: 1, 28, 29, 41, 56 are some of the soft signals. Refer \autoref{tab:lasso_selected_variables}\\
+\begin{table}[H]
+\centering
+\caption{Frequencies of the selected network features when using simulated data.}
+%\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\toprule
+& \multicolumn{8}{c|}{\cellcolor[HTML]{D9E1F2}\textbf{Feature Indexes}} \\ 
+\midrule
+\cellcolor[HTML]{D9E1F2}\textbf{Model} & 
+\cellcolor[HTML]{EAEAEA}\textbf{1} & \cellcolor[HTML]{EAEAEA}\textbf{25} & \cellcolor[HTML]{EAEAEA}\textbf{28} & \cellcolor[HTML]{EAEAEA}\textbf{29} & \cellcolor[HTML]{EAEAEA}\textbf{41} & \cellcolor[HTML]{EAEAEA}\textbf{43} & \cellcolor[HTML]{EAEAEA}\textbf{56} & \cellcolor[HTML]{EAEAEA}\textbf{89} \\ \hline
+\cellcolor[HTML]{EAEAEA}{Lasso\_CV} & 
+3 & 6 & 6 & 3 & 1 & 9 & 6 & 8\\ \hline
+\cellcolor[HTML]{EAEAEA}{Plasso} &
+3 & 10 & 10 & 3 & 3 & 10 & 10 & 10  \\ 
+\bottomrule
+\end{tabular}
+%}
+\label{tab:lasso_selected_variables}
+\end{table}
+
+\subsection{Simulation Results from Exclusive Lasso\_CV} \label{subsec:simstudy_exclusvlasso}
+For assessing the Exclusive Lasso model on the simulated data we use the top network features, derived using the Lasso\_CV model (refer \autoref{subsec:plasso_cv}), as the \lq gold-standard' for the causal variables. It is observed that Exclusive Lasso consistently identifies the true causal variables in every iteration and therefore has a perfect sensitivity value. This result asserts the findings from the Lasso models. Note that Exclusive Lasso shows a very high FDR and low F1 values. This observation is due to the compulsion of the Exclusive Lasso model to select at least one feature from each of the feature blocks. \\[4pt]
+\begin{table}[H]
+\caption{Performance measures of Exclusive Lasso when using variables from Lasso\_CV as reference.}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|c|}\hline
+\cellcolor[HTML]{D9E1F2}\textbf{Models} & 
+\cellcolor[HTML]{D9E1F2}\textbf{True Feature Indexes}  & 
+\cellcolor[HTML]{D9E1F2}\textbf{Sensitivity} & 
+\cellcolor[HTML]{D9E1F2}\textbf{FDR} &
+\cellcolor[HTML]{D9E1F2}\textbf{F1} &
+\cellcolor[HTML]{D9E1F2}\textbf{Power} &
+\cellcolor[HTML]{D9E1F2}\textbf{Stability} \\ \hline
+Exclusive Lasso\_CV & 25, 43, 82, 89 & 1 & 0.8519 & 0.2581 & 1, 1, 1, 1 & 1 \\ \hline
+\end{tabular}}
+\label{tab:exclusv_lasso_sim_study}
+\end{table}
